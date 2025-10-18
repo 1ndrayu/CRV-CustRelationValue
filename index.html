@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CLV Prediction Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1 class="title">Customer Lifetime Value Dashboard</h1>
+            <p class="subtitle">Multi-Model CLV Predictions with Optimal Ensemble Weighting</p>
+        </header>
+
+        <div class="summary-cards">
+            <div class="card">
+                <h3>Total Customers</h3>
+                <p class="metric" id="total-customers">-</p>
+            </div>
+            <div class="card">
+                <h3>Avg Ensemble CLV</h3>
+                <p class="metric" id="avg-ensemble">-</p>
+            </div>
+            <div class="card">
+                <h3>Avg Probabilistic CLV</h3>
+                <p class="metric" id="avg-probabilistic">-</p>
+            </div>
+            <div class="card">
+                <h3>Avg XGBoost CLV</h3>
+                <p class="metric" id="avg-xgboost">-</p>
+            </div>
+        </div>
+
+        <div class="controls">
+            <div class="search-box">
+                <input type="text" id="search-input" placeholder="Search by Customer ID...">
+                <button id="search-btn">Search</button>
+            </div>
+            <div class="filter-controls">
+                <select id="sort-select">
+                    <option value="ensemble">Sort by Ensemble CLV</option>
+                    <option value="probabilistic">Sort by Probabilistic CLV</option>
+                    <option value="xgboost">Sort by XGBoost CLV</option>
+                    <option value="monetary">Sort by Monetary Value</option>
+                </select>
+                <button id="refresh-btn">Refresh Data</button>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table id="clv-table">
+                <thead>
+                    <tr>
+                        <th>Customer ID</th>
+                        <th>Frequency</th>
+                        <th>Recency</th>
+                        <th>Monetary Value</th>
+                        <th>Probabilistic CLV</th>
+                        <th>XGBoost CLV</th>
+                        <th>Ensemble CLV</th>
+                        <th>Expected Transactions</th>
+                    </tr>
+                </thead>
+                <tbody id="table-body">
+                    <!-- Data will be populated here -->
+                </tbody>
+            </table>
+        </div>
+
+        <div class="pagination">
+            <button id="prev-page" disabled>Previous</button>
+            <span id="page-info">Page 1 of 1</span>
+            <button id="next-page" disabled>Next</button>
+        </div>
+
+        <footer class="footer">
+            <p>© 2025 CLV Prediction System | Probabilistic + XGBoost Ensemble with Optimal Weighting</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
