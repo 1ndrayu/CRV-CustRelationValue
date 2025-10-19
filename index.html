@@ -3,79 +3,85 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CLV Prediction Dashboard</title>
+    <title>CLV Customer Search</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div class="container">
         <header class="header">
-            <h1 class="title">Customer Lifetime Value Dashboard</h1>
-            <p class="subtitle">Multi-Model CLV Predictions with Optimal Ensemble Weighting</p>
+            <h1>Customer Lifetime Value Search</h1>
+            <p>Search customer records by any field from CLV predictions</p>
         </header>
 
-        <div class="summary-cards">
-            <div class="card">
-                <h3>Total Customers</h3>
-                <p class="metric" id="total-customers">-</p>
-            </div>
-            <div class="card">
-                <h3>Avg Ensemble CLV</h3>
-                <p class="metric" id="avg-ensemble">-</p>
-            </div>
-            <div class="card">
-                <h3>Avg Probabilistic CLV</h3>
-                <p class="metric" id="avg-probabilistic">-</p>
-            </div>
-            <div class="card">
-                <h3>Avg XGBoost CLV</h3>
-                <p class="metric" id="avg-xgboost">-</p>
-            </div>
-        </div>
+        <main class="main-content">
+            <div class="search-section">
+                <div class="search-controls">
+                    <div class="field-selector">
+                        <label for="search-field">Search by:</label>
+                        <select id="search-field">
+                            <option value="CustomerID">Customer ID</option>
+                            <option value="Frequency">Frequency</option>
+                            <option value="Recency">Recency</option>
+                            <option value="Monetary_Value">Monetary Value</option>
+                            <option value="Probabilistic_CLV">Probabilistic CLV</option>
+                            <option value="XGBoost_CLV">XGBoost CLV</option>
+                            <option value="Ensemble_CLV">Ensemble CLV</option>
+                            <option value="Expected_Transactions_12M">Expected Transactions</option>
+                        </select>
+                    </div>
 
-        <div class="controls">
-            <div class="search-box">
-                <input type="text" id="search-input" placeholder="Search by Customer ID...">
-                <button id="search-btn">Search</button>
-            </div>
-            <div class="filter-controls">
-                <select id="sort-select">
-                    <option value="ensemble">Sort by Ensemble CLV</option>
-                    <option value="probabilistic">Sort by Probabilistic CLV</option>
-                    <option value="xgboost">Sort by XGBoost CLV</option>
-                    <option value="monetary">Sort by Monetary Value</option>
-                </select>
-                <button id="refresh-btn">Refresh Data</button>
-            </div>
-        </div>
+                    <div class="search-input-container">
+                        <input type="text" id="search-input" placeholder="Enter search term...">
+                        <button id="search-btn">Search</button>
+                        <button id="clear-btn">Clear</button>
+                    </div>
+                </div>
 
-        <div class="table-container">
-            <table id="clv-table">
-                <thead>
-                    <tr>
-                        <th>Customer ID</th>
-                        <th>Frequency</th>
-                        <th>Recency</th>
-                        <th>Monetary Value</th>
-                        <th>Probabilistic CLV</th>
-                        <th>XGBoost CLV</th>
-                        <th>Ensemble CLV</th>
-                        <th>Expected Transactions</th>
-                    </tr>
-                </thead>
-                <tbody id="table-body">
-                    <!-- Data will be populated here -->
-                </tbody>
-            </table>
-        </div>
+                <div class="search-status" id="search-status">
+                    Select a field and enter a search term above
+                </div>
+            </div>
 
-        <div class="pagination">
-            <button id="prev-page" disabled>Previous</button>
-            <span id="page-info">Page 1 of 1</span>
-            <button id="next-page" disabled>Next</button>
-        </div>
+            <div class="pagination-section">
+                <div class="pagination-info" id="pagination-info">
+                    Showing 0 of 0 results
+                </div>
+                <div class="pagination-controls">
+                    <button id="prev-page" disabled>Previous</button>
+                    <div class="page-numbers" id="page-numbers">
+                        <span class="current-page">1</span>
+                    </div>
+                    <button id="next-page" disabled>Next</button>
+                </div>
+            </div>
+
+            <div class="results-section">
+                <div class="results-container">
+                    <table id="results-table">
+                        <thead>
+                            <tr>
+                                <th>Customer ID</th>
+                                <th>Frequency</th>
+                                <th>Recency</th>
+                                <th>Monetary Value</th>
+                                <th>Probabilistic CLV</th>
+                                <th>XGBoost CLV</th>
+                                <th>Ensemble CLV</th>
+                                <th>Expected Transactions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="results-body">
+                            <tr>
+                                <td colspan="8" class="no-data">Loading customer data...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
 
         <footer class="footer">
-            <p>© 2025 CLV Prediction System | Probabilistic + XGBoost Ensemble with Optimal Weighting</p>
+            <p>CLV Prediction System - Customer Search Interface</p>
         </footer>
     </div>
 

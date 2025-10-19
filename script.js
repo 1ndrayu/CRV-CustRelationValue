@@ -1,224 +1,114 @@
-// CLV Dashboard JavaScript
-class CLVDashboard {
+// CLV Customer Search - Simplified Version
+class CLVSearch {
     constructor() {
-        this.data = [];
-        this.filteredData = [];
+        this.allData = [];
+        this.searchResults = [];
+        this.currentSearchField = 'CustomerID';
         this.currentPage = 1;
-        this.itemsPerPage = 5;
-        this.init();
+        this.itemsPerPage = 10;
+        this.initializeApp();
     }
 
-    init() {
-        this.loadData();
-        this.setupEventListeners();
+    initializeApp() {
+        console.log('Starting CLV Search initialization...');
+        this.loadDataSynchronously();
     }
 
-    async loadData() {
+    loadDataSynchronously() {
+        console.log('Loading CSV data...');
+        const csvText = this.loadCSVFile();
+        if (csvText) {
+            this.allData = this.parseCSV(csvText);
+            console.log(`Loaded ${this.allData.length} customer records`);
+            this.setupEventListeners();
+            this.showAllData();
+        } else {
+            this.showError('Failed to load CSV file');
+        }
+    }
+
+    loadCSVFile() {
         try {
-            this.showLoading();
-            console.log('Attempting to fetch CSV file...');
+            // Use synchronous XMLHttpRequest for simplicity
+            const xhr = new XMLHttpRequest();
+            xhr.open('GET', 'clv_predictions.csv', false); // synchronous
+            xhr.send();
 
-            const response = await fetch('clv_predictions.csv');
-
-            if (!response.ok) {
-                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            if (xhr.status === 200) {
+                return xhr.responseText;
+            } else {
+                console.error('Failed to load CSV:', xhr.status);
+                return null;
             }
-
-            const csvText = await response.text();
-            console.log('CSV loaded successfully, length:', csvText.length);
-
-            if (!csvText.trim()) {
-                throw new Error('CSV file is empty');
-            }
-
-            this.data = this.parseCSV(csvText);
-            console.log('Parsed data:', this.data.length, 'rows');
-
-            if (this.data.length === 0) {
-                throw new Error('No valid data found in CSV');
-            }
-
-            this.filteredData = [...this.data];
-            console.log('Data loaded successfully');
-
-            this.updateSummaryCards();
-            this.renderTable();
-            this.hideLoading();
         } catch (error) {
-            console.error('Error loading data:', error);
-            this.showError(`Failed to load CLV data: ${error.message}`);
+            console.error('Error loading CSV file:', error);
+            return null;
         }
     }
 
     parseCSV(csvText) {
-        try {
-            const lines = csvText.split('\n').filter(line => line.trim());
-            console.log('Total lines in CSV:', lines.length);
+        const lines = csvText.split('\n').filter(line => line.trim());
+        const headers = lines[0].split(',').map(h => h.trim());
 
-            if (lines.length < 2) {
-                throw new Error('CSV must have at least header and one data row');
-            }
+        return lines.slice(1).map((line, index) => {
+            const values = line.split(',').map(v => v.trim());
 
-            const headers = lines[0].split(',').map(header => header.trim());
-            console.log('Headers:', headers);
+            const obj = {};
+            headers.forEach((header, i) => {
+                const value = values[i];
 
-            const data = lines.slice(1).map((line, index) => {
-                try {
-                    const values = line.split(',').map(value => value.trim());
-
-                    if (values.length !== headers.length) {
-                        console.warn(`Row ${index + 2} has ${values.length} columns, expected ${headers.length}`);
-                        return null; // Skip malformed rows
-                    }
-
-                    const obj = {};
-                    headers.forEach((header, colIndex) => {
-                        const value = values[colIndex];
-
-                        // Handle numeric columns
-                        if (header.includes('CLV') || header.includes('Value') ||
-                            header.includes('Transactions') || header.includes('Frequency') ||
-                            header.includes('Recency') || header.includes('T')) {
-                            const numValue = parseFloat(value);
-                            obj[header] = isNaN(numValue) ? 0 : numValue;
-                        } else {
-                            obj[header] = value || '';
-                        }
-                    });
-
-                    return obj;
-                } catch (rowError) {
-                    console.warn(`Error parsing row ${index + 2}:`, rowError);
-                    return null; // Skip problematic rows
+                // Handle numeric fields
+                if (['Frequency', 'Recency', 'T', 'Monetary_Value', 'Probabilistic_CLV', 'XGBoost_CLV', 'Ensemble_CLV', 'Expected_Transactions_12M'].includes(header)) {
+                    const num = parseFloat(value);
+                    obj[header] = isNaN(num) ? 0 : num;
+                } else {
+                    obj[header] = value || '';
                 }
-            }).filter(row => row !== null && row.CustomerID !== '');
-
-            console.log('Successfully parsed', data.length, 'valid rows');
-            return data;
-
-        } catch (error) {
-            console.error('CSV parsing error:', error);
-            throw new Error(`Failed to parse CSV: ${error.message}`);
-        }
-    }
-
-    updateSummaryCards() {
-        if (this.data.length === 0) return;
-
-        const totalCustomers = this.data.length;
-
-        const avgEnsemble = this.calculateAverage('Ensemble_CLV');
-        const avgProbabilistic = this.calculateAverage('Probabilistic_CLV');
-        const avgXGBoost = this.calculateAverage('XGBoost_CLV');
-
-        this.updateElement('total-customers', totalCustomers.toLocaleString());
-        this.updateElement('avg-ensemble', `$${avgEnsemble.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`);
-        this.updateElement('avg-probabilistic', `$${avgProbabilistic.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`);
-        this.updateElement('avg-xgboost', `$${avgXGBoost.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`);
-    }
-
-    calculateAverage(column) {
-        if (this.data.length === 0) return 0;
-        const sum = this.data.reduce((acc, row) => acc + (row[column] || 0), 0);
-        return sum / this.data.length;
-    }
-
-    renderTable() {
-        const tableBody = document.getElementById('table-body');
-        if (!tableBody) {
-            console.error('Table body not found');
-            return;
-        }
-
-        const startIndex = (this.currentPage - 1) * this.itemsPerPage;
-        const endIndex = startIndex + this.itemsPerPage;
-        const pageData = this.filteredData.slice(startIndex, endIndex);
-
-        tableBody.innerHTML = '';
-
-        pageData.forEach((row, index) => {
-            const tr = document.createElement('tr');
-
-            // Highlight top customers (top 5% by ensemble CLV)
-            const topThreshold = this.calculatePercentile(95, 'Ensemble_CLV');
-            if (row.Ensemble_CLV >= topThreshold) {
-                tr.classList.add('top-customer');
-            }
-
-            const cellData = [
-                row.CustomerID || 'N/A',
-                row.Frequency || 0,
-                row.Recency || 0,
-                `$${row.Monetary_Value?.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) || '0.00'}`,
-                `$${row.Probabilistic_CLV?.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) || '0.00'}`,
-                `$${row.XGBoost_CLV?.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) || '0.00'}`,
-                `$${row.Ensemble_CLV?.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) || '0.00'}`,
-                row.Expected_Transactions_12M?.toFixed(2) || '0.00'
-            ];
-
-            cellData.forEach((data, cellIndex) => {
-                const td = document.createElement('td');
-                td.textContent = data;
-
-                // Highlight search results
-                const searchTerm = document.getElementById('search-input')?.value?.toLowerCase();
-                if (searchTerm && data.toString().toLowerCase().includes(searchTerm)) {
-                    td.classList.add('highlight');
-                }
-
-                tr.appendChild(td);
             });
 
-            tableBody.appendChild(tr);
-        });
-
-        this.updatePagination();
-    }
-
-    updatePagination() {
-        const pageInfo = document.getElementById('page-info');
-        const prevBtn = document.getElementById('prev-page');
-        const nextBtn = document.getElementById('next-page');
-
-        if (!pageInfo || !prevBtn || !nextBtn) {
-            console.error('Pagination elements not found');
-            return;
-        }
-
-        const totalPages = Math.ceil(this.filteredData.length / this.itemsPerPage);
-
-        pageInfo.textContent = `Page ${this.currentPage} of ${totalPages}`;
-
-        prevBtn.disabled = this.currentPage === 1;
-        nextBtn.disabled = this.currentPage === totalPages || totalPages === 0;
+            return obj;
+        }).filter(row => row.CustomerID && row.CustomerID !== 'nan');
     }
 
     setupEventListeners() {
-        // Search functionality
-        const searchInput = document.getElementById('search-input');
-        const searchBtn = document.getElementById('search-btn');
-
-        if (searchInput) {
-            searchInput.addEventListener('input', (e) => {
-                this.filterData(e.target.value);
+        // Field selector
+        const fieldSelect = document.getElementById('search-field');
+        if (fieldSelect) {
+            fieldSelect.addEventListener('change', (e) => {
+                this.currentSearchField = e.target.value;
+                this.currentPage = 1;
+                this.displayResults(this.searchResults);
+                this.updatePagination();
             });
         }
 
+        // Search input
+        const searchInput = document.getElementById('search-input');
+        if (searchInput) {
+            searchInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    this.performSearch();
+                }
+            });
+        }
+
+        // Search button
+        const searchBtn = document.getElementById('search-btn');
         if (searchBtn) {
             searchBtn.addEventListener('click', () => {
-                this.filterData(searchInput?.value || '');
+                this.performSearch();
             });
         }
 
-        // Sort functionality
-        const sortSelect = document.getElementById('sort-select');
-        if (sortSelect) {
-            sortSelect.addEventListener('change', (e) => {
-                this.sortData(e.target.value);
+        // Clear button
+        const clearBtn = document.getElementById('clear-btn');
+        if (clearBtn) {
+            clearBtn.addEventListener('click', () => {
+                this.clearSearch();
             });
         }
 
-        // Pagination
+        // Pagination buttons
         const prevBtn = document.getElementById('prev-page');
         const nextBtn = document.getElementById('next-page');
 
@@ -226,131 +116,138 @@ class CLVDashboard {
             prevBtn.addEventListener('click', () => {
                 if (this.currentPage > 1) {
                     this.currentPage--;
-                    this.renderTable();
+                    this.displayResults(this.searchResults);
+                    this.updatePagination();
                 }
             });
         }
 
         if (nextBtn) {
             nextBtn.addEventListener('click', () => {
-                const totalPages = Math.ceil(this.filteredData.length / this.itemsPerPage);
+                const totalPages = Math.ceil(this.searchResults.length / this.itemsPerPage);
                 if (this.currentPage < totalPages) {
                     this.currentPage++;
-                    this.renderTable();
+                    this.displayResults(this.searchResults);
+                    this.updatePagination();
                 }
             });
         }
-
-        // Refresh button
-        const refreshBtn = document.getElementById('refresh-btn');
-        if (refreshBtn) {
-            refreshBtn.addEventListener('click', () => {
-                this.loadData();
-            });
-        }
     }
 
-    filterData(searchTerm) {
-        if (!searchTerm.trim()) {
-            this.filteredData = [...this.data];
-        } else {
-            const term = searchTerm.toLowerCase();
-            this.filteredData = this.data.filter(row => {
-                return (row.CustomerID && row.CustomerID.toString().toLowerCase().includes(term)) ||
-                       (row.Monetary_Value && row.Monetary_Value.toString().toLowerCase().includes(term));
-            });
+    performSearch() {
+        const searchInput = document.getElementById('search-input');
+        const searchTerm = searchInput?.value?.trim();
+
+        if (!searchTerm) {
+            this.showAllData();
+            return;
         }
 
-        this.currentPage = 1;
-        this.renderTable();
-    }
+        const results = this.allData.filter(customer => {
+            const fieldValue = customer[this.currentSearchField];
 
-    sortData(sortBy) {
-        const sortColumn = this.getSortColumn(sortBy);
-
-        this.filteredData.sort((a, b) => {
-            const aVal = a[sortColumn] || 0;
-            const bVal = b[sortColumn] || 0;
-
-            if (typeof aVal === 'string') {
-                return aVal.localeCompare(bVal);
-            } else {
-                return bVal - aVal; // Descending for numeric values
+            if (fieldValue === undefined || fieldValue === null) {
+                return false;
             }
+
+            const fieldStr = fieldValue.toString().toLowerCase();
+            const searchStr = searchTerm.toLowerCase();
+
+            return fieldStr.includes(searchStr);
         });
 
-        this.renderTable();
+        this.searchResults = results;
+        this.currentPage = 1;
+        this.displayResults(results);
+        this.updatePagination();
     }
 
-    getSortColumn(sortBy) {
-        const columnMap = {
-            'ensemble': 'Ensemble_CLV',
-            'probabilistic': 'Probabilistic_CLV',
-            'xgboost': 'XGBoost_CLV',
-            'monetary': 'Monetary_Value'
-        };
-        return columnMap[sortBy] || 'Ensemble_CLV';
-    }
+    displayResults(results) {
+        const tbody = document.getElementById('results-body');
+        if (!tbody) return;
 
-    calculatePercentile(percentile, column) {
-        if (this.data.length === 0) return 0;
-
-        const values = this.data.map(row => row[column] || 0).sort((a, b) => a - b);
-        const index = (percentile / 100) * (values.length - 1);
-        const lower = Math.floor(index);
-        const upper = Math.ceil(index);
-
-        if (lower === upper) {
-            return values[lower];
-        }
-
-        return values[lower] * (upper - index) + values[upper] * (index - lower);
-    }
-
-    showLoading() {
-        const tableContainer = document.querySelector('.table-container');
-        if (tableContainer) {
-            tableContainer.innerHTML = `
-                <div class="loading">
-                    <div class="spinner"></div>
-                    <p>Loading CLV data...</p>
-                </div>
+        if (results.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="8" class="no-data">No customers found</td>
+                </tr>
             `;
-        } else {
-            console.error('Table container not found');
+            return;
+        }
+
+        const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+        const endIndex = startIndex + this.itemsPerPage;
+        const pageData = results.slice(startIndex, endIndex);
+
+        tbody.innerHTML = '';
+
+        pageData.forEach(customer => {
+            const row = document.createElement('tr');
+            const cells = [
+                customer.CustomerID || 'N/A',
+                customer.Frequency || 0,
+                customer.Recency || 0,
+                `$${customer.Monetary_Value?.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) || '0.00'}`,
+                `$${customer.Probabilistic_CLV?.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) || '0.00'}`,
+                `$${customer.XGBoost_CLV?.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) || '0.00'}`,
+                `$${customer.Ensemble_CLV?.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) || '0.00'}`,
+                (customer.Expected_Transactions_12M || 0).toFixed(2)
+            ];
+
+            cells.forEach(cellData => {
+                const cell = document.createElement('td');
+                cell.textContent = cellData;
+                row.appendChild(cell);
+            });
+
+            tbody.appendChild(row);
+        });
+    }
+
+    updatePagination() {
+        const totalPages = Math.ceil(this.searchResults.length / this.itemsPerPage);
+        const startItem = (this.currentPage - 1) * this.itemsPerPage + 1;
+        const endItem = Math.min(this.currentPage * this.itemsPerPage, this.searchResults.length);
+
+        const paginationInfo = document.getElementById('pagination-info');
+        if (paginationInfo) {
+            paginationInfo.textContent = `Showing ${startItem}-${endItem} of ${this.searchResults.length} results`;
+        }
+
+        const currentPageSpan = document.querySelector('.current-page');
+        if (currentPageSpan) {
+            currentPageSpan.textContent = this.currentPage;
+        }
+
+        const prevBtn = document.getElementById('prev-page');
+        const nextBtn = document.getElementById('next-page');
+
+        if (prevBtn) {
+            prevBtn.disabled = this.currentPage === 1 || this.searchResults.length === 0;
+        }
+
+        if (nextBtn) {
+            nextBtn.disabled = this.currentPage === totalPages || this.searchResults.length === 0;
         }
     }
 
-    hideLoading() {
-        // Loading is hidden when renderTable() is called
+    showAllData() {
+        this.searchResults = [...this.allData];
+        this.currentPage = 1;
+        this.displayResults(this.allData);
+        this.updatePagination();
     }
 
-    showError(message) {
-        const tableContainer = document.querySelector('.table-container');
-        if (tableContainer) {
-            tableContainer.innerHTML = `
-                <div class="loading" style="color: #e74c3c;">
-                    <p>⚠️ ${message}</p>
-                    <button onclick="dashboard.loadData()" style="margin-top: 15px; padding: 10px 20px; background: #3498db; color: white; border: none; border-radius: 20px; cursor: pointer;">Retry</button>
-                </div>
-            `;
-        } else {
-            console.error('Table container not found for error display');
-            // Fallback: try to show error in console or alert
-            alert(`Error: ${message}`);
+    clearSearch() {
+        const searchInput = document.getElementById('search-input');
+        if (searchInput) {
+            searchInput.value = '';
         }
-    }
-
-    updateElement(id, content) {
-        const element = document.getElementById(id);
-        if (element) {
-            element.textContent = content;
-        }
+        this.showAllData();
     }
 }
 
-// Initialize dashboard when DOM is loaded
-let dashboard;
+// Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
-    dashboard = new CLVDashboard();
+    new CLVSearch();
 });
