@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Simple HTTP Server for CLV Dashboard
-Serves the web interface for the CLV prediction system
+Simple HTTP Server for CRV Dashboard
+Serves the web interface for the CRV prediction system
 """
 
 import http.server
@@ -11,7 +11,7 @@ import os
 import sys
 from pathlib import Path
 
-class CLVHandler(http.server.SimpleHTTPRequestHandler):
+class CRVHandler(http.server.SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=os.getcwd(), **kwargs)
 
@@ -28,7 +28,7 @@ class CLVHandler(http.server.SimpleHTTPRequestHandler):
 
 def main():
     # Check if required files exist
-    required_files = ['index.html', 'styles.css', 'script.js', 'clv_predictions.csv']
+    required_files = ['index.html', 'styles.css', 'script.js', 'crv_predictions.csv']
     missing_files = [f for f in required_files if not Path(f).exists()]
 
     if missing_files:
@@ -39,8 +39,8 @@ def main():
     # Server configuration
     PORT = 8000
     try:
-        with socketserver.TCPServer(("", PORT), CLVHandler) as httpd:
-            print("🚀 CLV Dashboard Server Starting...")
+        with socketserver.TCPServer(("", PORT), CRVHandler) as httpd:
+            print("🚀 CRV Dashboard Server Starting...")
             print(f"📊 Server running at: http://localhost:{PORT}")
             print(f"📁 Serving directory: {os.getcwd()}")
             print("🔄 Press Ctrl+C to stop the server")

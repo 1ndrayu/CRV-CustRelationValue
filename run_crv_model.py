@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-Probabilistic CLV Prediction System using BG/NBD & Gamma-Gamma Models
+Probabilistic CRV Prediction System using BG/NBD & Gamma-Gamma Models
 
-This script implements a customer lifetime value prediction system using the lifetimes library.
+This script implements a customer relationship value prediction system using the lifetimes library.
 It combines two probabilistic models:
 1. BG/NBD (Beta-Geometric/Negative Binomial Distribution) - predicts future transactions
 2. Gamma-Gamma - predicts future monetary value
@@ -112,10 +112,10 @@ def fit_gamma_gamma_model(rfm_summary):
     return ggf, rfm_repeat
 
 
-def calculate_clv_predictions(bgf, ggf, rfm_summary, time_horizon=12, discount_rate=0.01):
-    print(f"Calculating {time_horizon}-month CLV predictions...")
+def calculate_crv_predictions(bgf, ggf, rfm_summary, time_horizon=12, discount_rate=0.01):
+    print(f"Calculating {time_horizon}-month CRV predictions...")
 
-    clv_predictions = ggf.customer_lifetime_value(
+    crv_predictions = ggf.customer_lifetime_value(
         bgf,
         rfm_summary['frequency'],
         rfm_summary['recency'],
@@ -125,17 +125,17 @@ def calculate_clv_predictions(bgf, ggf, rfm_summary, time_horizon=12, discount_r
         discount_rate=discount_rate
     )
 
-    print(f"Generated CLV predictions for {len(clv_predictions)} customers")
-    print(f"CLV statistics:")
-    print(f"- Mean CLV: ${clv_predictions.mean():.2f}")
-    print(f"- Median CLV: ${clv_predictions.median():.2f}")
-    print(f"- Max CLV: ${clv_predictions.max():.2f}")
-    print(f"- Min CLV: ${clv_predictions.min():.2f}")
+    print(f"Generated CRV predictions for {len(crv_predictions)} customers")
+    print(f"CRV statistics:")
+    print(f"- Mean CRV: ${crv_predictions.mean():.2f}")
+    print(f"- Median CRV: ${crv_predictions.median():.2f}")
+    print(f"- Max CRV: ${crv_predictions.max():.2f}")
+    print(f"- Min CRV: ${crv_predictions.min():.2f}")
 
-    return clv_predictions
+    return crv_predictions
 
 
-def train_xgboost_model(rfm_summary, clv_predictions):
+def train_xgboost_model(rfm_summary, crv_predictions):
     print("Training XGBoost model...")
 
     features = rfm_summary[['frequency', 'recency', 'T', 'monetary_value']].copy()
@@ -147,7 +147,7 @@ def train_xgboost_model(rfm_summary, clv_predictions):
 
     features = features.replace([np.inf, -np.inf], np.nan).fillna(0)
 
-    target = clv_predictions.copy()
+    target = crv_predictions.copy()
 
     target_clean = target.replace([np.inf, -np.inf], np.nan).dropna()
 
@@ -193,7 +193,7 @@ def train_xgboost_model(rfm_summary, clv_predictions):
     return xgb_model, {'mae': mae, 'rmse': rmse}
 
 
-def predict_with_xgboost(xgb_model, rfm_summary, probabilistic_clv=None):
+def predict_with_xgboost(xgb_model, rfm_summary, probabilistic_crv=None):
     print("Generating XGBoost predictions...")
 
     features = rfm_summary[['frequency', 'recency', 'T', 'monetary_value']].copy()
@@ -205,10 +205,10 @@ def predict_with_xgboost(xgb_model, rfm_summary, probabilistic_clv=None):
 
     features = features.replace([np.inf, -np.inf], np.nan).fillna(0)
 
-    if probabilistic_clv is not None:
-        valid_customers = probabilistic_clv.replace([np.inf, -np.inf], np.nan).notna()
+    if probabilistic_crv is not None:
+        valid_customers = probabilistic_crv.replace([np.inf, -np.inf], np.nan).notna()
         features = features[valid_customers]
-        print(f"Predicting for {len(features)} customers with valid probabilistic CLV")
+        print(f"Predicting for {len(features)} customers with valid probabilistic CRV")
 
     xgb_predictions = xgb_model.predict(features)
 
@@ -216,7 +216,7 @@ def predict_with_xgboost(xgb_model, rfm_summary, probabilistic_clv=None):
 
     print(f"XGBoost predictions range: ${xgb_predictions.min():.2f} - ${xgb_predictions.max():.2f}")
 
-    if probabilistic_clv is not None:
+    if probabilistic_crv is not None:
         full_predictions = pd.Series(index=rfm_summary.index, dtype=float)
         if len(xgb_predictions) > 0:
             full_predictions[valid_customers] = xgb_predictions
@@ -227,14 +227,14 @@ def predict_with_xgboost(xgb_model, rfm_summary, probabilistic_clv=None):
         return pd.Series(xgb_predictions, index=features.index)
 
 
-def find_optimal_ensemble_weights(probabilistic_clv, xgb_clv, rfm_summary, n_splits=5):
+def find_optimal_ensemble_weights(probabilistic_crv, xgb_crv, rfm_summary, n_splits=5):
     print("Finding optimal ensemble weights using grid search...")
 
-    valid_mask = (probabilistic_clv.replace([np.inf, -np.inf], np.nan).notna() &
-                  xgb_clv.replace([np.inf, -np.inf], np.nan).notna())
+    valid_mask = (probabilistic_crv.replace([np.inf, -np.inf], np.nan).notna() &
+                  xgb_crv.replace([np.inf, -np.inf], np.nan).notna())
 
-    prob_clean = probabilistic_clv[valid_mask]
-    xgb_clean = xgb_clv[valid_mask]
+    prob_clean = probabilistic_crv[valid_mask]
+    xgb_clean = xgb_crv[valid_mask]
 
     print(f"Using {len(prob_clean)} customers with valid predictions for optimization")
 
@@ -320,10 +320,10 @@ def find_optimal_ensemble_weights(probabilistic_clv, xgb_clv, rfm_summary, n_spl
     return best_result
 
 
-def create_ensemble_prediction(probabilistic_clv, xgb_clv, rfm_summary=None, weights=None):
+def create_ensemble_prediction(probabilistic_crv, xgb_crv, rfm_summary=None, weights=None):
     if weights is None and rfm_summary is not None:
         print("Finding optimal ensemble weights...")
-        optimal_result = find_optimal_ensemble_weights(probabilistic_clv, xgb_clv, rfm_summary)
+        optimal_result = find_optimal_ensemble_weights(probabilistic_crv, xgb_crv, rfm_summary)
         weights = optimal_result['weights']
     elif weights is None:
         weights = {'probabilistic': 0.7, 'xgboost': 0.3}
@@ -331,18 +331,18 @@ def create_ensemble_prediction(probabilistic_clv, xgb_clv, rfm_summary=None, wei
     print("Creating ensemble prediction...")
     print(f"Using weights: Probabilistic={weights['probabilistic']}, XGBoost={weights['xgboost']}")
 
-    ensemble_clv = (probabilistic_clv * weights['probabilistic']) + (xgb_clv * weights['xgboost'])
+    ensemble_crv = (probabilistic_crv * weights['probabilistic']) + (xgb_crv * weights['xgboost'])
 
     print("Ensemble prediction statistics:")
-    print(f"- Mean CLV: ${ensemble_clv.mean():.2f}")
-    print(f"- Median CLV: ${ensemble_clv.median():.2f}")
-    print(f"- Max CLV: ${ensemble_clv.max():.2f}")
+    print(f"- Mean CRV: ${ensemble_crv.mean():.2f}")
+    print(f"- Median CRV: ${ensemble_crv.median():.2f}")
+    print(f"- Max CRV: ${ensemble_crv.max():.2f}")
 
-    return ensemble_clv, weights
+    return ensemble_crv, weights
 
 
-def save_clv_predictions(clv_predictions, rfm_summary, bgf, ggf, xgb_model=None, ensemble_clv=None, output_file='clv_predictions.csv'):
-    print(f"Saving comprehensive CLV predictions to {output_file}...")
+def save_crv_predictions(crv_predictions, rfm_summary, bgf, ggf, xgb_model=None, ensemble_crv=None, output_file='crv_predictions.csv'):
+    print(f"Saving comprehensive CRV predictions to {output_file}...")
 
     print("Calculating individual model components...")
 
@@ -365,7 +365,7 @@ def save_clv_predictions(clv_predictions, rfm_summary, bgf, ggf, xgb_model=None,
 
     xgb_predictions = None
     if xgb_model is not None:
-        xgb_predictions = predict_with_xgboost(xgb_model, rfm_summary, clv_predictions)
+        xgb_predictions = predict_with_xgboost(xgb_model, rfm_summary, crv_predictions)
 
     output_data = {
         'CustomerID': rfm_summary.index,
@@ -375,34 +375,34 @@ def save_clv_predictions(clv_predictions, rfm_summary, bgf, ggf, xgb_model=None,
         'Monetary_Value': rfm_summary['monetary_value'],
         'Expected_Transactions_12M': expected_transactions.round(2),
         'Expected_Order_Value': expected_order_value.round(2),
-        'Probabilistic_CLV': clv_predictions.round(2)
+        'Probabilistic_CRV': crv_predictions.round(2)
     }
 
     if xgb_predictions is not None:
-        output_data['XGBoost_CLV'] = xgb_predictions.round(2)
+        output_data['XGBoost_CRV'] = xgb_predictions.round(2)
 
-    if ensemble_clv is not None:
+    if ensemble_crv is not None:
         # Handle both Series and tuple cases
-        if isinstance(ensemble_clv, tuple):
-            ensemble_values, _ = ensemble_clv  # Unpack tuple to get the Series
+        if isinstance(ensemble_crv, tuple):
+            ensemble_values, _ = ensemble_crv  # Unpack tuple to get the Series
         else:
-            ensemble_values = ensemble_clv  # It's already a Series
-        output_data['Ensemble_CLV'] = ensemble_values.round(2)
+            ensemble_values = ensemble_crv  # It's already a Series
+        output_data['Ensemble_CRV'] = ensemble_values.round(2)
 
     output_df = pd.DataFrame(output_data)
 
-    sort_column = 'Ensemble_CLV' if ensemble_clv is not None else 'Probabilistic_CLV'
+    sort_column = 'Ensemble_CRV' if ensemble_crv is not None else 'Probabilistic_CRV'
     output_df = output_df.sort_values(sort_column, ascending=False)
 
     output_df.to_csv(output_file, index=False)
 
-    print(f"Comprehensive CLV predictions saved to {output_file}")
+    print(f"Comprehensive CRV predictions saved to {output_file}")
 
     summary_cols = ['CustomerID', 'Frequency', 'Recency', 'Monetary_Value']
     if xgb_predictions is not None:
-        summary_cols.extend(['Probabilistic_CLV', 'XGBoost_CLV'])
-        if ensemble_clv is not None:
-            summary_cols.append('Ensemble_CLV')
+        summary_cols.extend(['Probabilistic_CRV', 'XGBoost_CRV'])
+        if ensemble_crv is not None:
+            summary_cols.append('Ensemble_CRV')
 
     print(f"\nTop 5 customers by {sort_column.replace('_', ' ')}:")
     print(output_df[summary_cols].head().to_string(index=False))
@@ -410,20 +410,20 @@ def save_clv_predictions(clv_predictions, rfm_summary, bgf, ggf, xgb_model=None,
     print(f"\nModel Comparison Summary:")
     print(f"- Total customers analyzed: {len(output_df)}")
 
-    if ensemble_clv is not None:
-        print(f"- Average Ensemble CLV: ${output_df['Ensemble_CLV'].mean():.2f}")
-        print(f"- Average Probabilistic CLV: ${output_df['Probabilistic_CLV'].mean():.2f}")
-        print(f"- Average XGBoost CLV: ${output_df['XGBoost_CLV'].mean():.2f}")
+    if ensemble_crv is not None:
+        print(f"- Average Ensemble CRV: ${output_df['Ensemble_CRV'].mean():.2f}")
+        print(f"- Average Probabilistic CRV: ${output_df['Probabilistic_CRV'].mean():.2f}")
+        print(f"- Average XGBoost CRV: ${output_df['XGBoost_CRV'].mean():.2f}")
     else:
-        print(f"- Average Probabilistic CLV: ${output_df['Probabilistic_CLV'].mean():.2f}")
+        print(f"- Average Probabilistic CRV: ${output_df['Probabilistic_CRV'].mean():.2f}")
         if xgb_predictions is not None:
-            print(f"- Average XGBoost CLV: ${output_df['XGBoost_CLV'].mean():.2f}")
+            print(f"- Average XGBoost CRV: ${output_df['XGBoost_CRV'].mean():.2f}")
 
     print(f"- Top 10% customers represent: ${output_df[sort_column].quantile(0.9):.2f}")
 
 
 def main():
-    print("Starting Probabilistic CLV Prediction System")
+    print("Starting Probabilistic CRV Prediction System")
     print("=" * 60)
 
     data_file = 'data.csv'
@@ -440,28 +440,28 @@ def main():
 
         ggf, _ = fit_gamma_gamma_model(rfm_summary)
 
-        clv_predictions = calculate_clv_predictions(
+        crv_predictions = calculate_crv_predictions(
             bgf, ggf, rfm_summary,
             time_horizon=12,
             discount_rate=0.01
         )
 
         print("Step 6: Training XGBoost Model")
-        xgb_model, xgb_metrics = train_xgboost_model(rfm_summary, clv_predictions)
+        xgb_model, xgb_metrics = train_xgboost_model(rfm_summary, crv_predictions)
 
-        xgb_predictions = predict_with_xgboost(xgb_model, rfm_summary, clv_predictions)
+        xgb_predictions = predict_with_xgboost(xgb_model, rfm_summary, crv_predictions)
 
         print("Step 8: Creating Ensemble Prediction")
-        ensemble_clv, optimal_weights = create_ensemble_prediction(clv_predictions, xgb_predictions, rfm_summary)
+        ensemble_crv, optimal_weights = create_ensemble_prediction(crv_predictions, xgb_predictions, rfm_summary)
 
-        save_clv_predictions(clv_predictions, rfm_summary, bgf, ggf, xgb_model, ensemble_clv)
+        save_crv_predictions(crv_predictions, rfm_summary, bgf, ggf, xgb_model, ensemble_crv)
 
         print("=" * 60)
-        print("CLV Prediction System completed successfully!")
-        print("Check clv_predictions.csv for the results")
+        print("CRV Prediction System completed successfully!")
+        print("Check crv_predictions.csv for the results")
 
     except Exception as e:
-        print(f"❌ Error during CLV prediction: {str(e)}")
+        print(f"❌ Error during CRV prediction: {str(e)}")
         sys.exit(1)
 
 

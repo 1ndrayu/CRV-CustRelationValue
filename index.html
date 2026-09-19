@@ -3,18 +3,60 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CLV Customer Search</title>
+    <title>CRV Customer Search</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div class="container">
         <header class="header">
-            <h1>Customer Lifetime Value Search</h1>
-            <p>Search customer records by any field from CLV predictions</p>
+            <h1>Customer Relationship Value Search</h1>
+            <p>Search customer records by any field from CRV predictions</p>
+            <div class="sticky-note">
+                <strong>About this service:</strong> Derive relationship-value for a business using its own ledger data, tracing each customer through his history with the business.
+            </div>
         </header>
 
         <main class="main-content">
-            <div class="search-section">
+            <div class="tabs-container">
+                <button class="tab-btn active" data-tab="tab-calculator">Calculator</button>
+                <button class="tab-btn" data-tab="tab-search">Customer Search</button>
+            </div>
+
+            <div id="tab-calculator" class="tab-content active">
+                <div class="calculator-section">
+                    <h2>Simple CRV Calculator</h2>
+                    <div class="sticky-note">
+                        Use this calculator to quickly estimate the Customer Relationship Value based on recent data.
+                    </div>
+                    <div class="calculator-controls">
+                        <div class="calc-input-group tooltip-container">
+                            <label for="calc-monetary">Monetary Value ($)</label>
+                            <input type="number" id="calc-monetary" placeholder="e.g. 500" min="0">
+                            <span class="tooltip">Total money spent by the customer</span>
+                        </div>
+                        <div class="calc-input-group tooltip-container">
+                            <label for="calc-recency">Recency (Days)</label>
+                            <input type="number" id="calc-recency" placeholder="e.g. 30" min="0">
+                            <span class="tooltip">Days since last purchase</span>
+                        </div>
+                        <div class="calc-input-group tooltip-container">
+                            <label for="calc-frequency">Frequency (Purchases)</label>
+                            <input type="number" id="calc-frequency" placeholder="e.g. 5" min="0">
+                            <span class="tooltip">Total number of purchases</span>
+                        </div>
+                        <div class="calc-button-group">
+                            <button id="calc-btn">Calculate CRV</button>
+                        </div>
+                    </div>
+                    <div class="calc-result tooltip-container" id="calc-result">
+                        Estimated CRV: $0.00
+                        <span class="tooltip tooltip-right">Predicted future value of this customer</span>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tab-search" class="tab-content">
+                <div class="search-section">
                 <div class="search-controls">
                     <div class="field-selector">
                         <label for="search-field">Search by:</label>
@@ -23,9 +65,9 @@
                             <option value="Frequency">Frequency</option>
                             <option value="Recency">Recency</option>
                             <option value="Monetary_Value">Monetary Value</option>
-                            <option value="Probabilistic_CLV">Probabilistic CLV</option>
-                            <option value="XGBoost_CLV">XGBoost CLV</option>
-                            <option value="Ensemble_CLV">Ensemble CLV</option>
+                            <option value="Probabilistic_CRV">Probabilistic CRV</option>
+                            <option value="XGBoost_CRV">XGBoost CRV</option>
+                            <option value="Ensemble_CRV">Ensemble CRV</option>
                             <option value="Expected_Transactions_12M">Expected Transactions</option>
                         </select>
                     </div>
@@ -64,9 +106,9 @@
                                 <th>Frequency</th>
                                 <th>Recency</th>
                                 <th>Monetary Value</th>
-                                <th>Probabilistic CLV</th>
-                                <th>XGBoost CLV</th>
-                                <th>Ensemble CLV</th>
+                                <th>Probabilistic CRV</th>
+                                <th>XGBoost CRV</th>
+                                <th>Ensemble CRV</th>
                                 <th>Expected Transactions</th>
                             </tr>
                         </thead>
@@ -78,10 +120,11 @@
                     </table>
                 </div>
             </div>
+            </div>
         </main>
 
         <footer class="footer">
-            <p>CLV Prediction System - Customer Search Interface</p>
+            <p>CRV Prediction System - Customer Search Interface</p>
         </footer>
     </div>
 

@@ -1,8 +1,8 @@
-# CLV Prediction Dashboard
+# CRV Prediction Dashboard
 
 ## Overview
 
-A minimalist, clean web interface for visualizing Customer Lifetime Value (CLV) predictions. The dashboard displays multi-model CLV predictions in an interactive, easy-to-navigate format with modern design principles.
+A minimalist, clean web interface for visualizing Customer Relationship Value (CRV) predictions. The dashboard displays multi-model CRV predictions in an interactive, easy-to-navigate format with modern design principles.
 
 ## Features
 
@@ -13,7 +13,7 @@ A minimalist, clean web interface for visualizing Customer Lifetime Value (CLV) 
 - **Modern UX**: Smooth transitions and hover effects
 
 ### 📊 Data Visualization
-- **Summary Cards**: Key metrics at a glance (total customers, average CLV values)
+- **Summary Cards**: Key metrics at a glance (total customers, average CRV values)
 - **Interactive Table**: Sortable, searchable customer data
 - **Real-time Search**: Filter customers by ID or monetary value
 - **Pagination**: Navigate through large datasets efficiently
@@ -28,12 +28,12 @@ A minimalist, clean web interface for visualizing Customer Lifetime Value (CLV) 
 ## File Structure
 
 ```
-CLVv11/
+CRVv11/
 ├── index.html          # Main dashboard page
 ├── styles.css          # Minimalist styling
 ├── script.js           # Interactive functionality
 ├── server.py           # Simple HTTP server
-├── clv_predictions.csv # CLV prediction data
+├── crv_predictions.csv # CRV prediction data
 ├── model_study.md      # Technical documentation
 └── requirements.txt    # Python dependencies
 ```
@@ -44,7 +44,7 @@ CLVv11/
 
 ```bash
 # Navigate to the project directory
-cd "d:\documents\ANN projects\CLVv11"
+cd "d:\documents\ANN projects\CRVv11"
 
 # Start the web server
 python server.py
@@ -64,15 +64,15 @@ The server will automatically:
 ## Dashboard Sections
 
 ### Header
-- **Title**: "Customer Lifetime Value Dashboard"
+- **Title**: "Customer Relationship Value Dashboard"
 - **Subtitle**: Multi-model predictions with optimal weighting
 
 ### Summary Cards
 Display key metrics:
 - **Total Customers**: Number of customers analyzed
-- **Avg Ensemble CLV**: Average ensemble prediction
-- **Avg Probabilistic CLV**: Average probabilistic model prediction
-- **Avg XGBoost CLV**: Average machine learning prediction
+- **Avg Ensemble CRV**: Average ensemble prediction
+- **Avg Probabilistic CRV**: Average probabilistic model prediction
+- **Avg XGBoost CRV**: Average machine learning prediction
 
 ### Interactive Table
 Shows detailed customer data:
@@ -80,14 +80,14 @@ Shows detailed customer data:
 - **Frequency**: Historical purchase frequency
 - **Recency**: Days since last purchase
 - **Monetary Value**: Total historical spending
-- **Probabilistic CLV**: BG/NBD + Gamma-Gamma prediction
-- **XGBoost CLV**: Machine learning prediction
-- **Ensemble CLV**: Optimal weighted combination
+- **Probabilistic CRV**: BG/NBD + Gamma-Gamma prediction
+- **XGBoost CRV**: Machine learning prediction
+- **Ensemble CRV**: Optimal weighted combination
 - **Expected Transactions**: Predicted future purchases (12 months)
 
 ### Controls
 - **Search Box**: Filter customers by ID or monetary value
-- **Sort Dropdown**: Sort by different CLV predictions or monetary value
+- **Sort Dropdown**: Sort by different CRV predictions or monetary value
 - **Refresh Button**: Reload data from CSV file
 - **Pagination**: Navigate through pages of results
 
@@ -95,16 +95,16 @@ Shows detailed customer data:
 
 ### Color Coding
 - **Standard rows**: Regular customer data
-- **Highlighted rows**: Top 5% of customers by Ensemble CLV (special styling)
+- **Highlighted rows**: Top 5% of customers by Ensemble CRV (special styling)
 - **Search highlights**: Matching text highlighted in yellow
 
 ### Model Comparison
-- **Probabilistic CLV**: Theoretically sound, interpretable predictions
-- **XGBoost CLV**: Data-driven, pattern-based predictions
-- **Ensemble CLV**: Optimal combination (90% XGBoost, 10% Probabilistic)
+- **Probabilistic CRV**: Theoretically sound, interpretable predictions
+- **XGBoost CRV**: Data-driven, pattern-based predictions
+- **Ensemble CRV**: Optimal combination (90% XGBoost, 10% Probabilistic)
 
 ### Top Customers
-Customers are ranked by Ensemble CLV. The top tier represents customers with the highest predicted lifetime value, making them prime targets for retention and growth strategies.
+Customers are ranked by Ensemble CRV. The top tier represents customers with the highest predicted lifetime value, making them prime targets for retention and growth strategies.
 
 ## Technical Notes
 
@@ -128,7 +128,7 @@ Customers are ranked by Ensemble CLV. The top tier represents customers with the
 ### Common Issues
 
 **CSV file not loading**:
-- Ensure `clv_predictions.csv` exists in the same directory
+- Ensure `crv_predictions.csv` exists in the same directory
 - Check file permissions and format
 
 **Server not starting**:
@@ -149,7 +149,7 @@ The dashboard follows a modern web architecture:
 
 - **Frontend**: Vanilla HTML/CSS/JavaScript (no frameworks)
 - **Backend**: Simple Python HTTP server
-- **Data**: Static CSV file (generated by `run_clv_model.py`)
+- **Data**: Static CSV file (generated by `run_crv_model.py`)
 - **Styling**: Custom CSS with minimalist design principles
 
 This approach ensures:
@@ -161,12 +161,12 @@ This approach ensures:
 ## Future Enhancements
 
 Potential improvements for future versions:
-- **Data Visualization**: Charts and graphs for CLV distributions
+- **Data Visualization**: Charts and graphs for CRV distributions
 - **Export Features**: Download filtered data as CSV/PDF
 - **Real-time Updates**: Auto-refresh when CSV data changes
-- **Advanced Filters**: Date ranges, CLV thresholds, customer segments
+- **Advanced Filters**: Date ranges, CRV thresholds, customer segments
 - **Dark Mode**: Alternative color scheme for low-light environments
 
 ---
 
-*Built with ❤️ for clean, effective CLV visualization*
+*Built with ❤️ for clean, effective CRV visualization*

@@ -1,10 +1,10 @@
-# Multi-Model CLV Prediction System with Web Dashboard
+# Multi-Model CRV Prediction System with Web Dashboard
 
-A sophisticated Customer Lifetime Value (CLV) prediction system that combines probabilistic modeling, machine learning, and dynamic ensemble optimization. Features a beautiful minimalist web interface for interactive data exploration.
+A sophisticated Customer Relationship Value (CRV) prediction system that combines probabilistic modeling, machine learning, and dynamic ensemble optimization. Features a beautiful minimalist web interface for interactive data exploration.
 
 ## 🎯 Project Overview
 
-This system evolved from a basic probabilistic CLV model to a comprehensive multi-model approach that delivers optimal prediction accuracy through:
+This system evolved from a basic probabilistic CRV model to a comprehensive multi-model approach that delivers optimal prediction accuracy through:
 
 - **Probabilistic Models**: BG/NBD + Gamma-Gamma for theoretical soundness
 - **Machine Learning**: XGBoost with engineered features for empirical accuracy
@@ -17,9 +17,9 @@ This system evolved from a basic probabilistic CLV model to a comprehensive mult
 
 | File | Purpose | Key Functionality |
 |------|---------|-------------------|
-| **`run_clv_model.py`** | Main CLV prediction engine | Orchestrates entire prediction pipeline from data loading to ensemble optimization |
+| **`run_crv_model.py`** | Main CRV prediction engine | Orchestrates entire prediction pipeline from data loading to ensemble optimization |
 | **`data.csv`** | Input transaction data | Raw customer transaction records (530K+ transactions, 4.3K customers) |
-| **`clv_predictions.csv`** | Generated prediction results | 10-column comprehensive output with all model predictions |
+| **`crv_predictions.csv`** | Generated prediction results | 10-column comprehensive output with all model predictions |
 
 ### Web Dashboard Files
 
@@ -47,9 +47,9 @@ This system evolved from a basic probabilistic CLV model to a comprehensive mult
 pip install -r requirements.txt
 ```
 
-**Run the CLV Model:**
+**Run the CRV Model:**
 ```bash
-python run_clv_model.py
+python run_crv_model.py
 ```
 
 **What Happens:**
@@ -58,15 +58,15 @@ python run_clv_model.py
 3. **Feature Engineering**: Creates 8 XGBoost features from RFM data
 4. **XGBoost Training**: Machine learning model with performance validation
 5. **Ensemble Optimization**: Finds optimal weights (90% XGBoost, 10% Probabilistic)
-6. **Output Generation**: Creates `clv_predictions.csv` with 10 analytical columns
+6. **Output Generation**: Creates `crv_predictions.csv` with 10 analytical columns
 
 **Expected Runtime**: ~2-3 minutes
-**Output File**: `clv_predictions.csv` (272KB, 4,339 customers)
+**Output File**: `crv_predictions.csv` (272KB, 4,339 customers)
 
 ### Option 2: Web Dashboard (Interactive Exploration)
 
 **Prerequisites:**
-- Run the CLV model first (see Option 1) to generate `clv_predictions.csv`
+- Run the CRV model first (see Option 1) to generate `crv_predictions.csv`
 - Ensure all web files are present in the project directory
 
 **Start the Web Server:**
@@ -79,7 +79,7 @@ python server.py
 - Manual access: Navigate to `http://localhost:8000` in your browser
 
 **Dashboard Features:**
-- **Summary Cards**: Key metrics (total customers, average CLV values)
+- **Summary Cards**: Key metrics (total customers, average CRV values)
 - **Interactive Table**: Sortable, searchable customer data (5 records/page)
 - **Search Functionality**: Filter by Customer ID or monetary value
 - **Pagination**: Navigate through 868 pages of customer data
@@ -87,7 +87,7 @@ python server.py
 
 ## 📊 Output Data Structure
 
-The `clv_predictions.csv` contains 10 analytical columns:
+The `crv_predictions.csv` contains 10 analytical columns:
 
 | Column | Description | Model/Source |
 |--------|-------------|--------------|
@@ -98,9 +98,9 @@ The `clv_predictions.csv` contains 10 analytical columns:
 | `Monetary_Value` | Total historical spending | Input data |
 | `Expected_Transactions_12M` | Predicted future purchases | BG/NBD model |
 | `Expected_Order_Value` | Predicted order value | Gamma-Gamma model |
-| `Probabilistic_CLV` | Theoretical CLV prediction | BG/NBD + Gamma-Gamma |
-| `XGBoost_CLV` | Machine learning prediction | XGBoost model |
-| `Ensemble_CLV` | Optimal weighted prediction | 90% XGBoost + 10% Probabilistic |
+| `Probabilistic_CRV` | Theoretical CRV prediction | BG/NBD + Gamma-Gamma |
+| `XGBoost_CRV` | Machine learning prediction | XGBoost model |
+| `Ensemble_CRV` | Optimal weighted prediction | 90% XGBoost + 10% Probabilistic |
 
 ## 🎯 Business Value & Applications
 
@@ -110,20 +110,20 @@ The `clv_predictions.csv` contains 10 analytical columns:
 - **Retention Strategies**: Prioritize customers most likely to churn vs. high future value
 
 ### For Sales Teams
-- **Lead Prioritization**: Focus sales efforts on customers with highest CLV potential
+- **Lead Prioritization**: Focus sales efforts on customers with highest CRV potential
 - **Account Management**: Allocate account manager time based on predicted value
 - **Upselling Opportunities**: Target customers with capacity for increased spending
 
 ### For Strategic Planning
 - **Revenue Forecasting**: Predict future customer value for business planning
 - **Resource Allocation**: Optimize team resources based on customer value distribution
-- **Performance Metrics**: Track CLV prediction accuracy against actual outcomes
+- **Performance Metrics**: Track CRV prediction accuracy against actual outcomes
 
 ### Key Business Insights Delivered
 
 **Customer Insights:**
 - Top 5% of customers represent the highest-value segment
-- Average Ensemble CLV: $3,649 per customer
+- Average Ensemble CRV: $3,649 per customer
 - Optimal model weighting discovered through data-driven optimization
 
 **Predictive Power:**
@@ -175,7 +175,7 @@ The web dashboard embodies minimalist design principles:
 Potential expansions for enhanced business value:
 - **Real-time Predictions**: Live model updates as new data arrives
 - **Advanced Segmentation**: Demographic and behavioral customer clusters
-- **Cohort Analysis**: Track CLV predictions over time periods
+- **Cohort Analysis**: Track CRV predictions over time periods
 - **API Endpoints**: RESTful API for integration with other systems
 - **Export Capabilities**: PDF reports and advanced data export options
 

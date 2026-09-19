@@ -1,8 +1,8 @@
-# CLV Prediction System: Architectural Evolution Study
+# CRV Prediction System: Architectural Evolution Study
 
 ## Overview
 
-This document analyzes the evolution of a Customer Lifetime Value (CLV) prediction system from a basic probabilistic model to a sophisticated multi-model ensemble with dynamic weight optimization. The system progressed through multiple architectural iterations, each improving prediction accuracy, transparency, and robustness.
+This document analyzes the evolution of a Customer Relationship Value (CRV) prediction system from a basic probabilistic model to a sophisticated multi-model ensemble with dynamic weight optimization. The system progressed through multiple architectural iterations, each improving prediction accuracy, transparency, and robustness.
 
 ## Architecture Evolution
 
@@ -13,19 +13,19 @@ This document analyzes the evolution of a Customer Lifetime Value (CLV) predicti
 **Key Components**:
 - **BG/NBD Model**: Predicts future transaction frequency using Beta-Geometric/Negative Binomial Distribution
 - **Gamma-Gamma Model**: Predicts monetary value per transaction using Gamma-Gamma distribution
-- **Simple Output**: Basic CSV with CustomerID and Predicted_CLV_12_Months
+- **Simple Output**: Basic CSV with CustomerID and Predicted_CRV_12_Months
 
 **Output Structure**:
 ```csv
-CustomerID,Predicted_CLV_12_Months
+CustomerID,Predicted_CRV_12_Months
 16446.0,1757720.11
 nan,1405281.13
 ```
 
 **Performance**:
-- Mean CLV: $4,392.32
-- Median CLV: $1,788.92
-- Max CLV: $1,757,720.11
+- Mean CRV: $4,392.32
+- Median CRV: $1,788.92
+- Max CRV: $1,757,720.11
 - Theoretical foundation but limited empirical validation
 
 ---
@@ -37,11 +37,11 @@ nan,1405281.13
 **Key Enhancements**:
 - **Input Parameters**: CustomerID, Frequency, Recency, T, Monetary_Value
 - **Calculated Components**: Expected_Transactions_12M, Expected_Order_Value
-- **Model Transparency**: Shows how CLV is calculated (transactions × order value)
+- **Model Transparency**: Shows how CRV is calculated (transactions × order value)
 
 **New Output Columns**:
 ```csv
-CustomerID,Frequency,Recency,T,Monetary_Value,Expected_Transactions_12M,Expected_Order_Value,Calculated_CLV,Predicted_CLV_12_Months
+CustomerID,Frequency,Recency,T,Monetary_Value,Expected_Transactions_12M,Expected_Order_Value,Calculated_CRV,Predicted_CRV_12_Months
 16446.0,1.0,205.0,205.0,168469.6,0.08,831174.96,62468.52,1757720.11
 ```
 
@@ -78,13 +78,13 @@ CustomerID,Frequency,Recency,T,Monetary_Value,Expected_Transactions_12M,Expected
 **Architecture**: Combined probabilistic and XGBoost with fixed 0.7/0.3 weights
 
 **Key Components**:
-- **Ensemble Logic**: `(Probabilistic_CLV × 0.7) + (XGBoost_CLV × 0.3)`
+- **Ensemble Logic**: `(Probabilistic_CRV × 0.7) + (XGBoost_CRV × 0.3)`
 - **Dual Output**: Both individual model predictions and ensemble results
 - **Weight Rationale**: 70% theoretical, 30% empirical
 
 **Output Structure**:
 ```csv
-CustomerID,Frequency,Recency,T,Monetary_Value,Expected_Transactions_12M,Expected_Order_Value,Probabilistic_CLV,XGBoost_CLV,Ensemble_CLV
+CustomerID,Frequency,Recency,T,Monetary_Value,Expected_Transactions_12M,Expected_Order_Value,Probabilistic_CRV,XGBoost_CRV,Ensemble_CRV
 16446.0,1.0,205.0,205.0,168469.6,0.08,831174.96,1757720.11,122911.66,1267277.57
 ```
 
@@ -130,16 +130,16 @@ for prob_weight in [0.1-0.15, 0.1-0.1, 0.1-0.05, 0.1, 0.1+0.05, ...]:
 
 **Final Output Structure** (10 columns):
 ```csv
-CustomerID,Frequency,Recency,T,Monetary_Value,Expected_Transactions_12M,Expected_Order_Value,Probabilistic_CLV,XGBoost_CLV,Ensemble_CLV
+CustomerID,Frequency,Recency,T,Monetary_Value,Expected_Transactions_12M,Expected_Order_Value,Probabilistic_CRV,XGBoost_CRV,Ensemble_CRV
 nan,272.0,373.0,373.0,6406.957132352942,7.77,6425.8,1405281.13,227660.19,345422.28
 16446.0,1.0,205.0,205.0,168469.6,0.08,831174.96,1757720.11,122911.66,286392.5
 ```
 
 **Model Comparison Summary**:
 - **Total Customers**: 4,339
-- **Ensemble Mean CLV**: $3,648.98
-- **Probabilistic Mean CLV**: $4,392.32
-- **XGBoost Mean CLV**: $3,566.38
+- **Ensemble Mean CRV**: $3,648.98
+- **Probabilistic Mean CRV**: $4,392.32
+- **XGBoost Mean CRV**: $3,566.38
 - **Top 10% Customers**: $6,906.78
 
 ---
@@ -148,7 +148,7 @@ nan,272.0,373.0,373.0,6406.957132352942,7.77,6425.8,1405281.13,227660.19,345422.
 
 ### Prediction Accuracy Improvements
 
-| Iteration | Architecture | Mean CLV | Key Improvement |
+| Iteration | Architecture | Mean CRV | Key Improvement |
 |-----------|-------------|----------|----------------|
 | 1 | Basic Probabilistic | $4,392 | Baseline theoretical model |
 | 2 | Enhanced Probabilistic | $4,392 | Added transparency, same accuracy |
@@ -174,8 +174,8 @@ Key Insight: Optimal weighting (90% XGBoost) outperformed arbitrary weighting
 - **Optimal ensemble** achieves best of both worlds
 
 ### 2. **Weight Optimization Impact**
-- **Fixed weights (0.7/0.3)**: Mean CLV = $4,145
-- **Optimal weights (0.1/0.9)**: Mean CLV = $3,649
+- **Fixed weights (0.7/0.3)**: Mean CRV = $4,145
+- **Optimal weights (0.1/0.9)**: Mean CRV = $3,649
 - **Improvement**: ~12% better performance through data-driven optimization
 
 ### 3. **Feature Engineering Value**
@@ -184,7 +184,7 @@ Key Insight: Optimal weighting (90% XGBoost) outperformed arbitrary weighting
 - **Impact**: XGBoost captured 90% of ensemble weight due to better feature utilization
 
 ### 4. **Transparency Benefits**
-- **Before**: Single CLV number (black box)
+- **Before**: Single CRV number (black box)
 - **After**: 10-column breakdown showing all calculations
 - **Value**: Enables validation, debugging, and business understanding
 
@@ -208,7 +208,7 @@ Key Insight: Optimal weighting (90% XGBoost) outperformed arbitrary weighting
 
 ## Conclusion
 
-The CLV prediction system evolved from a basic theoretical model to a sophisticated multi-model ensemble with dynamic optimization. The key breakthrough was discovering that XGBoost (90% weight) significantly outperformed the probabilistic model when given proper features, resulting in more accurate predictions.
+The CRV prediction system evolved from a basic theoretical model to a sophisticated multi-model ensemble with dynamic optimization. The key breakthrough was discovering that XGBoost (90% weight) significantly outperformed the probabilistic model when given proper features, resulting in more accurate predictions.
 
 The final system provides:
 - **Optimal Performance**: Data-driven weight optimization

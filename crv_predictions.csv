@@ -1,4 +1,4 @@
-CustomerID,Frequency,Recency,T,Monetary_Value,Expected_Transactions_12M,Expected_Order_Value,Probabilistic_CLV,XGBoost_CLV,Ensemble_CLV
+CustomerID,Frequency,Recency,T,Monetary_Value,Expected_Transactions_12M,Expected_Order_Value,Probabilistic_CRV,XGBoost_CRV,Ensemble_CRV
 nan,272.0,373.0,373.0,6406.957132352942,7.77,6425.8,1405281.13,227660.19,345422.28
 16446.0,1.0,205.0,205.0,168469.6,0.08,831174.96,1757720.11,122911.66,286392.5
 14646.0,44.0,353.0,354.0,6366.705909090909,1.33,6484.23,242903.24,241412.09,241561.21

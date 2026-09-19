@@ -1,5 +1,5 @@
-// CLV Customer Search - Simplified Version
-class CLVSearch {
+// CRV Customer Search - Simplified Version
+class CRVSearch {
     constructor() {
         this.allData = [];
         this.searchResults = [];
@@ -10,8 +10,49 @@ class CLVSearch {
     }
 
     initializeApp() {
-        console.log('Starting CLV Search initialization...');
+        console.log('Starting CRV Search initialization...');
         this.loadDataSynchronously();
+        this.setupCalculator();
+        this.setupTabs();
+    }
+
+    setupTabs() {
+        const tabBtns = document.querySelectorAll('.tab-btn');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                // Remove active class from all buttons and contents
+                tabBtns.forEach(b => b.classList.remove('active'));
+                tabContents.forEach(c => c.classList.remove('active'));
+
+                // Add active class to clicked button and target content
+                btn.classList.add('active');
+                const targetId = btn.getAttribute('data-tab');
+                document.getElementById(targetId).classList.add('active');
+            });
+        });
+    }
+
+    setupCalculator() {
+        const calcBtn = document.getElementById('calc-btn');
+        if (!calcBtn) return;
+        
+        calcBtn.addEventListener('click', () => {
+            const m = parseFloat(document.getElementById('calc-monetary').value) || 0;
+            const r = parseFloat(document.getElementById('calc-recency').value) || 0;
+            const f = parseFloat(document.getElementById('calc-frequency').value) || 0;
+            
+            // Scalable factors from basic data analysis
+            const factorM = 3.8116;
+            const factorR = 8.9862;
+            const factorF = 401.7575;
+            
+            const estimatedCrv = (m * factorM) + (r * factorR) + (f * factorF);
+            
+            const resultDiv = document.getElementById('calc-result');
+            resultDiv.textContent = `Estimated CRV: $${estimatedCrv.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+        });
     }
 
     loadDataSynchronously() {
@@ -31,7 +72,7 @@ class CLVSearch {
         try {
             // Use synchronous XMLHttpRequest for simplicity
             const xhr = new XMLHttpRequest();
-            xhr.open('GET', 'clv_predictions.csv', false); // synchronous
+            xhr.open('GET', 'crv_predictions.csv', false); // synchronous
             xhr.send();
 
             if (xhr.status === 200) {
@@ -58,7 +99,7 @@ class CLVSearch {
                 const value = values[i];
 
                 // Handle numeric fields
-                if (['Frequency', 'Recency', 'T', 'Monetary_Value', 'Probabilistic_CLV', 'XGBoost_CLV', 'Ensemble_CLV', 'Expected_Transactions_12M'].includes(header)) {
+                if (['Frequency', 'Recency', 'T', 'Monetary_Value', 'Probabilistic_CRV', 'XGBoost_CRV', 'Ensemble_CRV', 'Expected_Transactions_12M'].includes(header)) {
                     const num = parseFloat(value);
                     obj[header] = isNaN(num) ? 0 : num;
                 } else {
@@ -188,9 +229,9 @@ class CLVSearch {
                 customer.Frequency || 0,
                 customer.Recency || 0,
                 `$${customer.Monetary_Value?.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) || '0.00'}`,
-                `$${customer.Probabilistic_CLV?.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) || '0.00'}`,
-                `$${customer.XGBoost_CLV?.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) || '0.00'}`,
-                `$${customer.Ensemble_CLV?.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) || '0.00'}`,
+                `$${customer.Probabilistic_CRV?.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) || '0.00'}`,
+                `$${customer.XGBoost_CRV?.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) || '0.00'}`,
+                `$${customer.Ensemble_CRV?.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) || '0.00'}`,
                 (customer.Expected_Transactions_12M || 0).toFixed(2)
             ];
 
@@ -249,5 +290,5 @@ class CLVSearch {
 
 // Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
-    new CLVSearch();
+    new CRVSearch();
 });
